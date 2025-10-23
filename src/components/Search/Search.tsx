@@ -19,7 +19,7 @@ const Search: React.FC = () => {
                 onChange={(e) => {
                     const val = e.target.value;
                     setQuery(val);
-                    setShow(query.length > 0);
+                    setShow(val.length > 0);
                 }}
             />
             {
