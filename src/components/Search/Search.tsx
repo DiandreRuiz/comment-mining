@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import Form from "react-bootstrap/Form";
 import Dropdown from "react-bootstrap/Dropdown";
+import SummaryBox from "./SummaryBox";
 
 const Search: React.FC = () => {
     const [query, setQuery] = useState<string>("");
-    const [show, setShow] = useState<boolean>(false);
+    const [showOptions, setShowOptions] = useState<boolean>(false);
+    const [showResults, setShowResults] = useState<boolean>(false);
     const suggestions = ["apple", "banana", "lettuce", "bread"];
 
     const filtered = suggestions.filter((item) => item.toLowerCase().includes(query.toLowerCase()));
@@ -19,7 +21,7 @@ const Search: React.FC = () => {
                 onChange={(e) => {
                     const val = e.target.value;
                     setQuery(val);
-                    setShow(val.length > 0);
+                    setShowOptions(val.length > 0);
                 }}
             />
             {
@@ -27,14 +29,14 @@ const Search: React.FC = () => {
                 // that there is at least 1 result. Need to add form submission
                 // functionality and automation upon choosing an option
             }
-            <Dropdown show={show && filtered.length > 0}>
+            <Dropdown show={showOptions && filtered.length > 0}>
                 <Dropdown.Menu show>
                     {filtered.map((item) => (
                         <Dropdown.Item
                             key={item}
                             onClick={() => {
                                 setQuery(item);
-                                setShow(false);
+                                setShowOptions(false);
                             }}
                         >
                             {item}
@@ -42,6 +44,7 @@ const Search: React.FC = () => {
                     ))}
                 </Dropdown.Menu>
             </Dropdown>
+            {showResults && <SummaryBox />}
         </div>
     );
 };
