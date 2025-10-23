@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Form from "react-bootstrap/Form";
 import Dropdown from "react-bootstrap/Dropdown";
 import SummaryBox from "./SummaryBox";
+import { searchYouTubeChannels } from "../../services/googleApiYoutube";
 
 const Search: React.FC = () => {
     const [query, setQuery] = useState<string>("");
@@ -10,6 +11,7 @@ const Search: React.FC = () => {
     const suggestions = ["apple", "banana", "lettuce", "bread"];
 
     const filtered = suggestions.filter((item) => item.toLowerCase().includes(query.toLowerCase()));
+
 
     return (
         <div style={{ position: "relative" }}>
