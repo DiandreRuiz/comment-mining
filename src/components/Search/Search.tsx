@@ -1,17 +1,13 @@
 import React, { useState } from "react";
 import Form from "react-bootstrap/Form";
 import Dropdown from "react-bootstrap/Dropdown";
-import SummaryBox from "./SummaryBox";
-import { searchYouTubeChannels } from "../../services/googleApiYoutube";
+import { useYouTubeResults } from "../../hooks/useYouTubeResults";
 
 const Search: React.FC = () => {
-    const [query, setQuery] = useState<string>("");
+    const [setQuery, results, isLoading, error, query] = useYouTubeResults();
+    // We will use this to store the selected channel ID for the 2nd API call
+    const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
     const [showOptions, setShowOptions] = useState<boolean>(false);
-    const [showResults, setShowResults] = useState<boolean>(false);
-    const suggestions = ["apple", "banana", "lettuce", "bread"];
-
-    const filtered = suggestions.filter((item) => item.toLowerCase().includes(query.toLowerCase()));
-
 
     return (
         <div style={{ position: "relative" }}>
@@ -23,7 +19,7 @@ const Search: React.FC = () => {
                 onChange={(e) => {
                     const val = e.target.value;
                     setQuery(val);
-                    setShowOptions(val.length > 0);
+                    setShowOptions(val.length > 2);
                 }}
             />
             {
@@ -31,22 +27,33 @@ const Search: React.FC = () => {
                 // that there is at least 1 result. Need to add form submission
                 // functionality and automation upon choosing an option
             }
-            <Dropdown show={showOptions && filtered.length > 0}>
+            <Dropdown show={showOptions && results.length > 0}>
                 <Dropdown.Menu show>
-                    {filtered.map((item) => (
-                        <Dropdown.Item
-                            key={item}
-                            onClick={() => {
-                                setQuery(item);
-                                setShowOptions(false);
-                            }}
-                        >
-                            {item}
-                        </Dropdown.Item>
-                    ))}
+                    {
+                        isLoading ? <p>Loading...</p> : (
+                            error ? <p>Error: {error}</p> :
+                            results.length > 0 ? results.map((item) => (
+                                <Dropdown.Item
+                                    key={item.id.channelId}
+                                    onClick={() => {
+                                        setSelectedChannelId(item.id.channelId ?? null);
+                                        setShowOptions(false);
+                                        setQuery(item.snippet.title);
+                                    }}
+                                >
+                                    {item.snippet.title}
+                                </Dropdown.Item>
+                            )) : <p>No results found</p>
+                        )
+                    }
                 </Dropdown.Menu>
             </Dropdown>
-            {showResults && <SummaryBox />}
+            {
+                // Here we will send another API call to get the channel comments
+            }
+            {
+            //showResults && <SummaryBox />
+            }
         </div>
     );
 };
