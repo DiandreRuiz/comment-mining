@@ -4,18 +4,24 @@ type YoutubeSearchDataContextType = {
     selectedChannelId: string | null;
     channelRecentVideoLinks: string[];
     channelComments: string[];
-    isLoading: boolean;
+    loading: boolean;
     error: string | null;
 };
 
-const SearchContext = createContext<YoutubeSearchDataContextType | undefined>(undefined);
+const YoutubeSearchDataContext = createContext<YoutubeSearchDataContextType | undefined>(undefined);
 
 type YoutubeSearchDataContextProviderProps = {
     children: React.ReactNode;
-    fetchRecentVideoLinks: (channelId: string) => Promise<string[]>;
-    fetchRecentVideoComments: (recentVideoLinks: string[]) => Promise<string[]>;
 };
 
-export const YoutubeSearchDataContextProvider: React.FC<YoutubeSearchDataContextProviderProps> = ({ children, fetchRecentVideoLinks, fetchRecentVideoComments }) => {
-    
+export const YoutubeSearchDataContextProvider: React.FC<YoutubeSearchDataContextProviderProps> = ({ children }) => {
+    const [selectedChannelId, setSelectedChannelId] = useState(null);
+    const [channelRecentVideoLinks, setChannelRecentVideoLinks] = useState([]);
+    const [channelComments, setChannelComments] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const getRecentVideoLinks = (channelId: string) => {};
+
+    return <YoutubeSearchDataContext.Provider value={{ selectedChannelId, channelRecentVideoLinks, channelComments, loading, error }}>{children}</YoutubeSearchDataContext.Provider>;
 };
