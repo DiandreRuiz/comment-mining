@@ -23,24 +23,34 @@ export const useYouTubeResults = () => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (query.length < MIN_QUERY_LENGTH) return;
-        setIsLoading(true);
-        const getResult = async () => {
+        if (query.length < MIN_QUERY_LENGTH) {
+            setResults([]);
+            return;
+        }
+
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+
+        const timeoutId = setTimeout(async () => {
+            setIsLoading(true);
+            setError(null);
+            
             try {
-                const res = await searchYouTubeChannels(query);
+                const res = await searchYouTubeChannels(query, signal);
                 setResults(res.items || []);
-                setIsLoading(false);
-                console.log("results", res);
             } catch (error) {
-                if (error instanceof Error) {
+                if (error instanceof Error && error.name === "AbortError") {
                     setError(error.message);
-                } else {
-                    setError(String(error));
                 }
+            } finally {
                 setIsLoading(false);
             }
+        }, 500);
+
+        return () => {
+            clearTimeout(timeoutId);
+            abortController.abort();
         };
-        getResult();
     }, [query]);
 
     return [setQuery, results, isLoading, error, query] as UseYouTubeResultsReturn;
