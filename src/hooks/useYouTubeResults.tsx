@@ -15,6 +15,7 @@ type UseYouTubeResultsReturn = [
   ];
 
 const MIN_QUERY_LENGTH = 3;
+const DEBOUNCE_DELAY = 500;
 
 export const useYouTubeResults = () => {
     const [query, setQuery] = useState<string>("");
@@ -34,18 +35,18 @@ export const useYouTubeResults = () => {
         const timeoutId = setTimeout(async () => {
             setIsLoading(true);
             setError(null);
-            
+
             try {
                 const res = await searchYouTubeChannels(query, signal);
                 setResults(res.items || []);
             } catch (error) {
                 if (error instanceof Error && error.name === "AbortError") {
-                    setError(error.message);
+                    console.error("Search aborted:", error.message);
                 }
             } finally {
                 setIsLoading(false);
             }
-        }, 500);
+        }, DEBOUNCE_DELAY);
 
         return () => {
             clearTimeout(timeoutId);
