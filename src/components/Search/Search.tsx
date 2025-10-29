@@ -2,28 +2,38 @@ import React, { useState } from "react";
 import Form from "react-bootstrap/Form";
 import Dropdown from "react-bootstrap/Dropdown";
 import Spinner from "react-bootstrap/Spinner";
-import { useYouTubeResults } from "../../hooks/useYouTubeResults";
+import Button from "react-bootstrap/Button";
+import InputGroup from "react-bootstrap/InputGroup";
+import { useYouTubeResults } from "../../hooks/useYoutubeResults";
+import { useYoutubeCommentAnalysisHook } from "../../hooks/useYoutubeCommentAnalysis";
 
 const Search: React.FC = () => {
-    const [setQuery, results, isLoading, error, query] = useYouTubeResults();
+    const [setQuery, setSelectedChannelId, results, isLoading, error, query] = useYouTubeResults();
     // We will use this to store the selected channel ID for the 2nd API call
-    const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
     const [showOptions, setShowOptions] = useState<boolean>(false);
 
     return (
         <div style={{ position: "relative" }}>
             <h1>YouTuber</h1>
-            <Form.Control
-                type="text"
-                placeholder="Search..."
-                value={query}
-                onChange={(e) => {
-                    const val = e.target.value;
-                    setQuery(val);
-                    setShowOptions(val.length > 2);
-                }}
-                className="mx-auto w-50"
-            />
+            <div className="d-flex justify-content-center">
+                <InputGroup style={{ width: '50%' }}>
+                    <Form.Control
+                        type="text"
+                        placeholder="Search..."
+                        value={query}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            setQuery(val);
+                            setShowOptions(val.length > 2);
+                        }}
+                        style={{ boxShadow: 'none' }}
+                        onFocus={(e) => e.target.style.boxShadow = 'none'}
+                        onBlur={(e) => e.target.style.boxShadow = 'none'}
+                    />
+                    <Button type="submit" variant="primary">Research</Button>
+                </InputGroup>
+            </div>
+            
             {
                 // Checks if the user's query is at least 1 character long and
                 // that there is at least 1 result. Need to add form submission

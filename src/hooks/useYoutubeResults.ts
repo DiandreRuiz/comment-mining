@@ -8,11 +8,13 @@ type YTChannelSearchItem = {
 
 type UseYouTubeResultsReturn = [
     Dispatch<SetStateAction<string>>, // setQuery
-    YTChannelSearchItem[],            // results
-    boolean,                          // isLoading
-    string | null,                    // error
-    string                            // query
-  ];
+    Dispatch<SetStateAction<string | null>>, // setSelectedChannelId
+    YTChannelSearchItem[],                // results
+    boolean,                              // isLoading
+    string | null,                        // error
+    string,                               // query
+    string | null                         // selectedChannelId
+];
 
 const MIN_QUERY_LENGTH = 3;
 const DEBOUNCE_DELAY = 500;
@@ -22,6 +24,7 @@ export const useYouTubeResults = () => {
     const [results, setResults] = useState<YTChannelSearchItem[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
 
     useEffect(() => {
         if (query.length < MIN_QUERY_LENGTH) {
@@ -54,5 +57,5 @@ export const useYouTubeResults = () => {
         };
     }, [query]);
 
-    return [setQuery, results, isLoading, error, query] as UseYouTubeResultsReturn;
+    return [setQuery, setSelectedChannelId, results, isLoading, error, query, selectedChannelId] as UseYouTubeResultsReturn;
 };
