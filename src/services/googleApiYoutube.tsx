@@ -20,11 +20,5 @@ export async function searchYouTubeChannels(query: string, signal?: AbortSignal)
 }
 
 export async function getYoutubeChannelComments(videoId: string) {
-    const res = await YOUTUBE_API_CLIENT.commentThreads.list({
-        params: {
-            part: "snippet",
-            videoId,
-        },
-    });
-    return res.data;
+    
 }
