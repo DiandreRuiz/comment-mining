@@ -1,10 +1,3 @@
-import { google } from "googleapis";
-
-const YOUTUBE_API_CLIENT = google.youtube({
-    version: "v3",
-    auth: import.meta.env.VITE_YT_API_KEY,
-});
-
 // services/youtubeService.ts
 export async function searchYouTubeChannels(query: string, signal?: AbortSignal) {
     const params = new URLSearchParams({
@@ -19,6 +12,6 @@ export async function searchYouTubeChannels(query: string, signal?: AbortSignal)
     return res.json();
 }
 
-export async function getYoutubeChannelComments(videoId: string) {
+export async function getTop3VideosByViews(channelId: string) {
     
 }

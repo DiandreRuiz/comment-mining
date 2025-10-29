@@ -5,7 +5,6 @@ import Spinner from "react-bootstrap/Spinner";
 import Button from "react-bootstrap/Button";
 import InputGroup from "react-bootstrap/InputGroup";
 import { useYouTubeResults } from "../../hooks/useYoutubeResults";
-import { useYoutubeCommentAnalysisHook } from "../../hooks/useYoutubeCommentAnalysis";
 
 const Search: React.FC = () => {
     const [setQuery, setSelectedChannelId, results, isLoading, error, query] = useYouTubeResults();
