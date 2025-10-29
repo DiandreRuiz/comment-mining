@@ -7,6 +7,7 @@ import { useYouTubeResults } from "../../hooks/useYouTubeResults";
 const Search: React.FC = () => {
     const [setQuery, results, isLoading, error, query] = useYouTubeResults();
     // We will use this to store the selected channel ID for the 2nd API call
+    const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
     const [showOptions, setShowOptions] = useState<boolean>(false);
 
     return (
