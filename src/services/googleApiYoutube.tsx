@@ -23,6 +23,10 @@ export async function getTop3VideosByViews(channelId: string, signal?: AbortSign
     });
 
     const res = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`, { signal });
-    if (!res.ok) throw new Error("Failed to fetch videos");
+    if (!res.ok) {
+        throw new Error("Failed to fetch videos");
+    }
     return res.json();
 }
+
+export async function getTopCommentsForVideosByVideoId
