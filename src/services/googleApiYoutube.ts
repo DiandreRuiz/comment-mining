@@ -1,4 +1,4 @@
-interface YouTubeCommentThreadItem {
+export interface YouTubeCommentThreadItem {
     id: string;
     snippet: {
         topLevelComment: {
@@ -56,8 +56,7 @@ export async function getTop3VideosByViews(channelId: string, signal?: AbortSign
     return res.json();
 }
 
-// services/youtubeService.ts
-export async function getVideoComments(videoId: string, signal?: AbortSignal) {
+export async function getVideoComments(videoId: string, signal?: AbortSignal): Promise<YouTubeCommentThreadItem> {
     const params = new URLSearchParams({
         part: "snippet",
         videoId,
@@ -67,15 +66,23 @@ export async function getVideoComments(videoId: string, signal?: AbortSignal) {
         key: import.meta.env.VITE_YT_API_KEY,
     });
 
+    // We need to handle if a YouTube video has comments disabled gracefully!
+
     const res = await fetch(`https://www.googleapis.com/youtube/v3/commentThreads?${params}`, { signal });
-    if (!res.ok) throw new Error("Failed to fetch comments");
+    // If the response failed, read and inspect the error body
+    if (!res.ok) {
+        let message = "Failed to fetch comments";
+        try {
+            const data = await res.json();
+            if (data?.error?.message) {
+                message = data.error.message; // grab the detailed YouTube message
+            }
+        } catch {
+            // ignore JSON parse errors, stick with default message
+        }
+        throw new Error(message);
+    }
 
     const data = await res.json();
-    return data.items.map((item: YouTubeCommentThreadItem) => ({
-        id: item.id,
-        text: item.snippet.topLevelComment.snippet.textOriginal,
-        author: item.snippet.topLevelComment.snippet.authorDisplayName,
-        likeCount: item.snippet.topLevelComment.snippet.likeCount,
-        publishedAt: item.snippet.topLevelComment.snippet.publishedAt,
-    }));
+    return data.items;
 }

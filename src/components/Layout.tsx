@@ -5,6 +5,8 @@ import Col from "react-bootstrap/Col";
 import Search from "./Search/Search";
 import SummaryBox from "./Search/SummaryBox";
 
+import Test from "./Test";
+
 const Layout: React.FC = () => {
     return (
         <Container>
@@ -14,8 +16,13 @@ const Layout: React.FC = () => {
                 </Col>
             </Row>
             <Row>
-            <Col md={6} xs={12} className="mt-4 text-center">
+                <Col md={6} xs={12} className="mt-4 text-center">
                     <SummaryBox />
+                </Col>
+            </Row>
+            <Row>
+                <Col>
+                    <Test />
                 </Col>
             </Row>
         </Container>
