@@ -56,17 +56,19 @@ export async function getTop3VideosByViews(channelId: string, signal?: AbortSign
     return res.json();
 }
 
-export async function getVideoComments(videoId: string, signal?: AbortSignal): Promise<YouTubeCommentThreadItem> {
+export async function getVideoComments(videoId: string, signal?: AbortSignal): Promise<YouTubeCommentThreadItem[]> {
     const params = new URLSearchParams({
         part: "snippet",
         videoId,
-        maxResults: "50",
+        maxResults: "100",
         order: "relevance", // or "time"
         textFormat: "plainText",
         key: import.meta.env.VITE_YT_API_KEY,
     });
 
     // We need to handle if a YouTube video has comments disabled gracefully!
+    // We will also need to make sure we get a big sample size of comments so that
+    // the LLM can recognize useless comments. Maybe we can sort by likes?
 
     const res = await fetch(`https://www.googleapis.com/youtube/v3/commentThreads?${params}`, { signal });
     // If the response failed, read and inspect the error body
