@@ -1,4 +1,6 @@
-openai
 flask
 flask_cors
+awsgi
+apig-wsgi
+openai
 python-dotenv

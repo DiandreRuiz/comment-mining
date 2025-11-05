@@ -4,5 +4,4 @@ export async function analyzeComments(commentsByVideoId: Record<string, string[]
         const currentVideosComments = commentsByVideoId[videoId];
         allComments = [...allComments, ...currentVideosComments];
     }
-    const 
 }

@@ -1,4 +1,4 @@
-import { getTop3VideosByViews, getVideoComments } from "../services/googleApiYoutube";
+import { getVideoComments } from "../services/googleApiYoutube";
 
 const Test = () => {
     const test = async () => {

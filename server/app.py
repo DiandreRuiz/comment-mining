@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
-from typing import Any, Dict, List
+from typing import Any, Dict
 from openai import OpenAI
 from openai import (
     AuthenticationError,
@@ -10,6 +10,7 @@ from openai import (
     APIConnectionError,
     APIError,
 )
+from apig_wsgi import make_lambda_handler
 
 load_dotenv()
 app = Flask(__name__)
@@ -18,7 +19,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))  # or just OpenAI() if env 
 
 @app.post("/api/evaluate")
 def evaluate():
-    data: Dict[str, Any] | None = request.get_json(silent=True)
+    data: Dict[str, Any] | None = request.get_json()
     if not isinstance(data, dict):
         return jsonify({"error": "Missing or invalid JSON"}), 400
 
@@ -41,10 +42,10 @@ def evaluate():
         resp = client.responses.create(
             model="gpt-5",        # use a real, available model
             input=prompt,
-            timeout=60,                 # optional timeout (seconds)
+            timeout=None,                 # optional timeout (seconds)
         )
-        # Prefer output_text for a clean string; fall back to full JSON if needed.
-        analysis_text = getattr("output_text", None)
+        # Prefer output_text for a clean string; fall back to full JSON if needed.)
+        analysis_text = getattr(resp, "output_text")
         if analysis_text:
             return jsonify({"analysis": analysis_text}), 200
         else:
@@ -66,3 +67,9 @@ def evaluate():
     except Exception as e:
         # Catch-all for unexpected issues
         return jsonify({"error": "Unexpected error.", "details": str(e)}), 500
+    
+# ---- Lambda entry point (no app.run on Lambda) ----
+lambda_handler = make_lambda_handler(app)
+    
+if __name__ == "__main__":
+    app.run(port=5000, debug=True)
