@@ -67,7 +67,7 @@ const Search: React.FC = () => {
                 </Dropdown.Menu>
             </Dropdown>
             {
-                // Here we will send another API call to get the channel comments
+                
             }
             {
                 //showResults && <SummaryBox />
