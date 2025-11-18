@@ -27,7 +27,7 @@ const Search: React.FC = () => {
 
     return (
         <div style={{ position: "relative" }}>
-            <h1>YouTube Channel Search</h1>
+            <h1>YouTube Channel Comment Mining</h1>
             <div className="mb-5">
                 <div className="d-flex justify-content-center">
                     <InputGroup style={{ width: "50%" }}>
