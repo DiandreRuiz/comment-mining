@@ -15,12 +15,12 @@ const Layout: React.FC = () => {
                     <Search />
                 </Col>
             </Row>
-            <Row>
+            <Row className="justify-content-center">
                 <Col md={6} xs={12} className="mt-4 text-center">
                     <SummaryBox />
                 </Col>
             </Row>
-            <Row>
+            <Row className="justify-content-center">
                 <Col>
                     <Test />
                 </Col>

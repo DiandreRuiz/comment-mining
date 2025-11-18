@@ -1,63 +1,78 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { getTop3VideosByViews, getVideoComments } from "../services/googleApiYoutube";
 
 type CommentsByVideo = Record<string, string[]>;
+type Stage = "Fetching top videos" | "Fetching comments" | "Done" | null;
+
+function isString(x: unknown): x is string {
+    return typeof x === "string";
+}
 
 export function useYoutubeCommentAnalysis(channelId: string) {
     const [data, setData] = useState<CommentsByVideo | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [loadingStage, setLoadingStage] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [loadingStage, setLoadingStage] = useState<Stage>(null);
+
+    // Keep the latest AbortSignal so we can guard state updates centrally
+    const latestSignal = useRef<AbortSignal | null>(null);
+
+    const safeSet = <T>(setter: (v: T) => void, value: T) => {
+        const s = latestSignal.current;
+        if (!s || !s.aborted) setter(value);
+    };
 
     const load = useCallback(
         async (signal?: AbortSignal) => {
+            latestSignal.current = signal ?? null;
             try {
-                setIsLoading(true);
-                setError(null);
-                setLoadingStage("Fetching top videos…");
+                safeSet(setError, null);
+                safeSet(setLoadingStage, "Fetching top videos");
+                safeSet(setData, null); // avoid stale display
 
                 // 1) Get top 3 videos
                 const top3 = await getTop3VideosByViews(channelId, signal);
-                const videoIds: string[] = top3.items.map((it) => it.id?.videoId).filter(Boolean);
 
                 if (signal?.aborted) return;
 
-                setLoadingStage("Fetching comments in parallel…");
+                const videoIds = (top3.items ?? []).map((it: any) => it?.id?.videoId as unknown).filter(isString);
 
-                // 2) Fetch each video’s comment threads in parallel
-                const threadLists = await Promise.all(
-                    videoIds.map((vid) =>
-                        getVideoComments(vid, signal).catch((e) => {
-                            // Swallow per-video failures so others can succeed
-                            console.warn(`Comments failed for ${vid}:`, e);
-                            return [];
-                        })
-                    )
-                );
+                if (videoIds.length === 0) {
+                    safeSet(setData, {});
+                    safeSet(setLoadingStage, "Done");
+                    return;
+                }
+
+                safeSet(setLoadingStage, "Fetching comments");
+
+                // 2) Fetch comment threads (per-video failures don’t cancel others)
+                const settled = await Promise.allSettled(videoIds.map((vid) => getVideoComments(vid, signal)));
 
                 if (signal?.aborted) return;
 
                 // 3) Build Record<string, string[]>
                 const byVideo: CommentsByVideo = {};
-                videoIds.forEach((vid, idx) => {
-                    const threads = threadLists[idx] ?? [];
-                    // Ensure the array exists before pushing
-                    if (!byVideo[vid]) byVideo[vid] = [];
-                    for (const t of threads) {
-                        byVideo[vid].push(t.snippet.topLevelComment.snippet.textOriginal);
+                settled.forEach((res, idx) => {
+                    const vid = videoIds[idx];
+                    byVideo[vid] = [];
+                    if (res.status === "fulfilled" && Array.isArray(res.value)) {
+                        for (const t of res.value) {
+                            const text = t?.snippet?.topLevelComment?.snippet?.textOriginal;
+                            if (isString(text)) byVideo[vid].push(text);
+                        }
+                    } else if (res.status === "rejected") {
+                        // optional: attach an empty array or a placeholder message
+                        // byVideo[vid].push(`[comments unavailable: ${String(res.reason)}]`);
                     }
                 });
 
-                setData(byVideo);
-                setLoadingStage("Done");
-            } catch (error: unknown) {
-                if (error instanceof Error) {
-                    console.error("Error message:", error.message);
-                } else {
-                    console.error("Unknown error:", error);
-                }
-            } finally {
-                setIsLoading(false);
+                safeSet(setData, byVideo);
+                safeSet(setLoadingStage, "Done");
+            } catch (e: unknown) {
+                // Don’t treat abort as an error
+                if ((e as any)?.name === "AbortError") return;
+                const msg = e instanceof Error ? e.message : String(e);
+                console.error("useYoutubeCommentAnalysis:", msg);
+                safeSet(setError, msg);
             }
         },
         [channelId]
@@ -66,18 +81,20 @@ export function useYoutubeCommentAnalysis(channelId: string) {
     // Run on mount / channelId change
     useEffect(() => {
         const controller = new AbortController();
+        latestSignal.current = controller.signal;
         load(controller.signal);
         return () => controller.abort();
     }, [load]);
 
-    // Optional: manual refetch
+    // Manual refetch — returns the controller so callers can abort if they want
     const refetch = useCallback(() => {
         const controller = new AbortController();
-        load(controller.signal);
-        return () => controller.abort(); // consumer can call this cleanup if needed
+        latestSignal.current = controller.signal;
+        void load(controller.signal);
+        return controller;
     }, [load]);
 
-    return { data, loadingStage, isLoading, error, refetch };
+    return { data, loadingStage, error, refetch };
 }
 
 export default useYoutubeCommentAnalysis;

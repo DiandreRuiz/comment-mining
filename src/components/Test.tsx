@@ -7,7 +7,7 @@ const Test = () => {
     };
     const data = test();
     console.log(data);
-    return <p>Testing</p>;
+    return <p className="text-center">Testing</p>;
 };
 
 export default Test;

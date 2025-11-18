@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
 import Dropdown from "react-bootstrap/Dropdown";
 import Spinner from "react-bootstrap/Spinner";
@@ -11,11 +11,24 @@ const Search: React.FC = () => {
     // We will use this to store the selected channel ID for the 2nd API call
     const [showOptions, setShowOptions] = useState<boolean>(false);
 
+    useEffect(() => {
+        const testBackend = async () => {
+            try {
+                const response = await fetch("/api");
+                console.log("Backend says:", response);
+            } catch (err) {
+                console.error("Error calling backend:", err);
+            }
+        };
+
+        testBackend();
+    }, []);
+
     return (
         <div style={{ position: "relative" }}>
             <h1>YouTuber</h1>
             <div className="d-flex justify-content-center">
-                <InputGroup style={{ width: '50%' }}>
+                <InputGroup style={{ width: "50%" }}>
                     <Form.Control
                         type="text"
                         placeholder="Search..."
@@ -25,14 +38,16 @@ const Search: React.FC = () => {
                             setQuery(val);
                             setShowOptions(val.length > 2);
                         }}
-                        style={{ boxShadow: 'none' }}
-                        onFocus={(e) => e.target.style.boxShadow = 'none'}
-                        onBlur={(e) => e.target.style.boxShadow = 'none'}
+                        style={{ boxShadow: "none" }}
+                        onFocus={(e) => (e.target.style.boxShadow = "none")}
+                        onBlur={(e) => (e.target.style.boxShadow = "none")}
                     />
-                    <Button type="submit" variant="primary">Research</Button>
+                    <Button type="submit" variant="primary">
+                        Research
+                    </Button>
                 </InputGroup>
             </div>
-            
+
             {
                 // Checks if the user's query is at least 1 character long and
                 // that there is at least 1 result. Need to add form submission
@@ -66,9 +81,7 @@ const Search: React.FC = () => {
                     )}
                 </Dropdown.Menu>
             </Dropdown>
-            {
-                
-            }
+            {}
             {
                 //showResults && <SummaryBox />
             }
