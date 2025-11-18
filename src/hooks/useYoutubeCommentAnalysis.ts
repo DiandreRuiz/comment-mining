@@ -1,15 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { getTop3VideosByViews, getVideoComments } from "../services/googleApiYoutube";
+import { analyzeComments } from "../services/openai";
 
 type CommentsByVideo = Record<string, string[]>;
-type Stage = "Fetching top videos" | "Fetching comments" | "Done" | null;
+type Stage = "Fetching top videos" | "Fetching comments" | "Analyzing comments" | "Done" | null;
 
 function isString(x: unknown): x is string {
     return typeof x === "string";
 }
 
 export function useYoutubeCommentAnalysis(channelId: string) {
-    const [data, setData] = useState<CommentsByVideo | null>(null);
+    const [data, setData] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loadingStage, setLoadingStage] = useState<Stage>(null);
 
@@ -25,19 +26,23 @@ export function useYoutubeCommentAnalysis(channelId: string) {
         async (signal?: AbortSignal) => {
             latestSignal.current = signal ?? null;
             try {
+                // 1) Get top 3 videos
+
                 safeSet(setError, null);
                 safeSet(setLoadingStage, "Fetching top videos");
                 safeSet(setData, null); // avoid stale display
 
-                // 1) Get top 3 videos
                 const top3 = await getTop3VideosByViews(channelId, signal);
 
                 if (signal?.aborted) return;
 
-                const videoIds = (top3.items ?? []).map((it: any) => it?.id?.videoId as unknown).filter(isString);
+                const videoIds = (top3.items ?? []).map((it) => {
+                    const videoId = it?.id?.videoId;
+                    return videoId as unknown;
+                }).filter(isString);
 
                 if (videoIds.length === 0) {
-                    safeSet(setData, {});
+                    safeSet(setData, "No videos found for this channel.");
                     safeSet(setLoadingStage, "Done");
                     return;
                 }
@@ -49,7 +54,7 @@ export function useYoutubeCommentAnalysis(channelId: string) {
 
                 if (signal?.aborted) return;
 
-                // 3) Build Record<string, string[]>
+                // Build Record<string, string[]>
                 const byVideo: CommentsByVideo = {};
                 settled.forEach((res, idx) => {
                     const vid = videoIds[idx];
@@ -65,11 +70,19 @@ export function useYoutubeCommentAnalysis(channelId: string) {
                     }
                 });
 
-                safeSet(setData, byVideo);
+                if (signal?.aborted) return;
+
+                // 3) Analyze comments using openai
+                safeSet(setLoadingStage, "Analyzing comments");
+                const analysis = await analyzeComments(byVideo, signal);
+
+                if (signal?.aborted) return;
+
+                safeSet(setData, analysis);
                 safeSet(setLoadingStage, "Done");
             } catch (e: unknown) {
-                // Don’t treat abort as an error
-                if ((e as any)?.name === "AbortError") return;
+                // Don't treat abort as an error
+                if (e instanceof Error && e.name === "AbortError") return;
                 const msg = e instanceof Error ? e.message : String(e);
                 console.error("useYoutubeCommentAnalysis:", msg);
                 safeSet(setError, msg);

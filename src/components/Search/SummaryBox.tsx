@@ -21,8 +21,10 @@ const SummaryBox: React.FC = () => {
     }
 
     if (data) {
-        return <p>{JSON.stringify(data)}</p>;
+        return <p>{data}</p>;
     }
+
+    return null;
 };
 
 export default SummaryBox;
