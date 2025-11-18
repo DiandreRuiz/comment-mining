@@ -5,7 +5,7 @@ import Col from "react-bootstrap/Col";
 import Search from "./Search/Search";
 import SummaryBox from "./Search/SummaryBox";
 
-import Test from "./Test";
+//import Test from "./Test";
 
 const Layout: React.FC = () => {
     return (
@@ -21,9 +21,7 @@ const Layout: React.FC = () => {
                 </Col>
             </Row>
             <Row className="justify-content-center">
-                <Col>
-                    <Test />
-                </Col>
+                <Col></Col>
             </Row>
         </Container>
     );
