@@ -23,8 +23,6 @@ def hello_world():
 
 @app.post("/api/evaluate")
 def evaluate():
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))  # or just OpenAI() if env is set
-
     data: Dict[str, Any] | None = request.get_json()
     if not isinstance(data, dict):
         return jsonify({"error": "Missing or invalid JSON"}), 400
