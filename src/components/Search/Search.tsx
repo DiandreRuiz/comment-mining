@@ -26,7 +26,7 @@ const Search: React.FC = () => {
 
     return (
         <div style={{ position: "relative" }}>
-            <h1>YouTuber</h1>
+            <h1>YouTube Channel Search</h1>
             <div className="d-flex justify-content-center">
                 <InputGroup style={{ width: "50%" }}>
                     <Form.Control
