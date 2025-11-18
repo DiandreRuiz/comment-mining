@@ -9,7 +9,7 @@ function isString(x: unknown): x is string {
     return typeof x === "string";
 }
 
-export function useYoutubeCommentAnalysis(channelId: string) {
+export function useYoutubeCommentAnalysis(channelId: string | null) {
     const [data, setData] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loadingStage, setLoadingStage] = useState<Stage>(null);
@@ -24,6 +24,9 @@ export function useYoutubeCommentAnalysis(channelId: string) {
 
     const load = useCallback(
         async (signal?: AbortSignal) => {
+            if (!channelId) {
+                return;
+            }
             latestSignal.current = signal ?? null;
             try {
                 // 1) Get top 3 videos
@@ -36,10 +39,12 @@ export function useYoutubeCommentAnalysis(channelId: string) {
 
                 if (signal?.aborted) return;
 
-                const videoIds = (top3.items ?? []).map((it) => {
-                    const videoId = it?.id?.videoId;
-                    return videoId as unknown;
-                }).filter(isString);
+                const videoIds = (top3.items ?? [])
+                    .map((it) => {
+                        const videoId = it?.id?.videoId;
+                        return videoId as unknown;
+                    })
+                    .filter(isString);
 
                 if (videoIds.length === 0) {
                     safeSet(setData, "No videos found for this channel.");

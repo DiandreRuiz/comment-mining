@@ -1,11 +1,18 @@
 import React from "react";
-
 import useYoutubeCommentAnalysis from "../../hooks/useYoutubeCommentAnalysis";
-
 import Spinner from "react-bootstrap/Spinner";
 
-const SummaryBox: React.FC = () => {
-    const { data, loadingStage, error } = useYoutubeCommentAnalysis("UCMNEVbszv8ZyvSXoTn3yhpQ");
+interface SummaryBoxProps {
+    channelId: string | null;
+}
+
+const SummaryBox: React.FC<SummaryBoxProps> = ({ channelId }) => {
+    const { data, loadingStage, error } = useYoutubeCommentAnalysis(channelId);
+    
+    // Don't show anything if no channel is selected
+    if (!channelId) {
+        return null;
+    }
 
     if (error) {
         return <p>Error: {String(error)}</p>;

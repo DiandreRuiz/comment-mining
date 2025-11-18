@@ -5,9 +5,10 @@ import Spinner from "react-bootstrap/Spinner";
 import Button from "react-bootstrap/Button";
 import InputGroup from "react-bootstrap/InputGroup";
 import { useYouTubeResults } from "../../hooks/useYoutubeResults";
+import SummaryBox from "./SummaryBox";
 
 const Search: React.FC = () => {
-    const [setQuery, setSelectedChannelId, results, isLoading, error, query] = useYouTubeResults();
+    const [setQuery, setSelectedChannelId, results, isLoading, error, query, selectedChannelId] = useYouTubeResults();
     // We will use this to store the selected channel ID for the 2nd API call
     const [showOptions, setShowOptions] = useState<boolean>(false);
 
@@ -81,10 +82,7 @@ const Search: React.FC = () => {
                     )}
                 </Dropdown.Menu>
             </Dropdown>
-            {}
-            {
-                //showResults && <SummaryBox />
-            }
+            {selectedChannelId && <SummaryBox channelId={selectedChannelId} />}
         </div>
     );
 };
