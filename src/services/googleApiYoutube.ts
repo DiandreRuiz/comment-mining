@@ -27,57 +27,65 @@ export type YouTubeSearchResponse = {
 
 // services/youtubeService.ts
 export async function searchYouTubeChannels(query: string, signal?: AbortSignal) {
-    const params = new URLSearchParams({
-        part: "snippet",
-        type: "channel",
-        q: query,
-        key: import.meta.env.VITE_YT_API_KEY,
+    const res = await fetch('/api/youtube', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action: 'searchChannels',
+            q: query,
+        }),
+        signal,
     });
-
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`, { signal });
-    if (!res.ok) throw new Error("Failed to fetch channels");
+    
+    if (!res.ok) {
+        const error = await res.json().catch(() => ({ error: 'Failed to fetch channels' }));
+        throw new Error(error.error || 'Failed to fetch channels');
+    }
+    
     return res.json();
 }
 
 export async function getTop3VideosByViews(channelId: string, signal?: AbortSignal): Promise<YouTubeSearchResponse> {
-    const params = new URLSearchParams({
-        part: "id",
-        type: "video",
-        channelId: channelId.toString(),
-        order: "viewCount",
-        maxResults: "3",
-        key: import.meta.env.VITE_YT_API_KEY,
+    const res = await fetch('/api/youtube', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action: 'getTopVideos',
+            channelId: channelId.toString(),
+        }),
+        signal,
     });
-
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`, { signal });
+    
     if (!res.ok) {
-        throw new Error("Failed to fetch videos");
+        const error = await res.json().catch(() => ({ error: 'Failed to fetch videos' }));
+        throw new Error(error.error || 'Failed to fetch videos');
     }
+    
     return res.json();
 }
 
 export async function getVideoComments(videoId: string, signal?: AbortSignal): Promise<YouTubeCommentThreadItem[]> {
-    const params = new URLSearchParams({
-        part: "snippet",
-        videoId,
-        maxResults: "100",
-        order: "relevance", // or "time"
-        textFormat: "plainText",
-        key: import.meta.env.VITE_YT_API_KEY,
-    });
-
     // We need to handle if a YouTube video has comments disabled gracefully!
     // We will also need to make sure we get a big sample size of comments so that
     // the LLM can recognize useless comments. Maybe we can sort by likes?
 
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/commentThreads?${params}`, { signal });
+    const res = await fetch('/api/youtube', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action: 'getVideoComments',
+            videoId,
+        }),
+        signal,
+    });
+    
     // If the response failed, read and inspect the error body
     if (!res.ok) {
         let message = "Failed to fetch comments";
         try {
             const data = await res.json();
-            if (data?.error?.message) {
-                message = data.error.message; // grab the detailed YouTube message
+            if (data?.error) {
+                message = data.error; // grab the detailed error message
             }
         } catch {
             // ignore JSON parse errors, stick with default message
@@ -86,5 +94,5 @@ export async function getVideoComments(videoId: string, signal?: AbortSignal): P
     }
 
     const data = await res.json();
-    return data.items;
+    return data.items || [];
 }
