@@ -8,7 +8,7 @@ interface SummaryBoxProps {
 
 const SummaryBox: React.FC<SummaryBoxProps> = ({ channelId }) => {
     const { data, loadingStage, error } = useYoutubeCommentAnalysis(channelId);
-    
+
     // Don't show anything if no channel is selected
     if (!channelId) {
         return null;
@@ -28,7 +28,12 @@ const SummaryBox: React.FC<SummaryBoxProps> = ({ channelId }) => {
     }
 
     if (data) {
-        return <p>{data}</p>;
+        return (
+            <>
+                <h1>Comment Analysis</h1>
+                <p>{data}</p>
+            </>
+        );
     }
 
     return null;

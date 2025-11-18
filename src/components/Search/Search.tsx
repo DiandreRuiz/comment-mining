@@ -28,7 +28,7 @@ const Search: React.FC = () => {
     return (
         <div style={{ position: "relative" }}>
             <h1>YouTube Channel Search</h1>
-            <div className="d-flex justify-content-center">
+            <div className="d-flex justify-content-center mb-5">
                 <InputGroup style={{ width: "50%" }}>
                     <Form.Control
                         type="text"
@@ -54,7 +54,7 @@ const Search: React.FC = () => {
                 // that there is at least 1 result. Need to add form submission
                 // functionality and automation upon choosing an option
             }
-            <Dropdown show={showOptions} className="mx-auto w-50 mb-3">
+            <Dropdown show={showOptions} className="mx-auto w-50">
                 <Dropdown.Menu>
                     {isLoading ? (
                         <div className="text-center p-2">
