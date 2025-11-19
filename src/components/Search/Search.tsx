@@ -27,13 +27,13 @@ const Search: React.FC = () => {
 
     return (
         <div style={{ position: "relative" }}>
-            <h1>YouTube Channel Comment Mining</h1>
+            <h1>YouTube Comment Mining ⛏️</h1>
             <div className="mb-5">
                 <div className="d-flex justify-content-center">
                     <InputGroup style={{ width: "50%" }}>
                         <Form.Control
                             type="text"
-                            placeholder="Search..."
+                            placeholder="Channel Search..."
                             value={query}
                             onChange={(e) => {
                                 const val = e.target.value;
